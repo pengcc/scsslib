@@ -1,0 +1,155 @@
+$bgColor: red;
+$browserPrefixes: (-moz-, -webkit-, -o-, -ms-);
+
+@mixin square($width, $bgcolor: $bgColor) {
+  width: $width;
+  height: $width;
+  background: $bgcolor;
+}
+
+@mixin rectangle($width, $height, $bgcolor: $bgColor) {
+  width: $width;
+  height: $height;
+  background: $bgcolor;
+}
+@mixin universal_border-radius($radius, $verticalRadius: null) {
+  @if ($verticalRadius) {
+    $radius: #{$radius}/#{$verticalRadius};
+  }
+  @each $prefix in $browserPrefixes {
+    #{$prefix}border-radius: $radius;
+  }
+  border-radius: $radius
+}
+
+@mixin circle($width) {
+  @include square($width);
+  @include universal_border-radius(50%);
+}
+
+@mixin oval($width, $height) {
+  @include rectangle($width, $height);
+  @include universal_border-radius(50%);
+}
+
+%zeroSize{
+  width: 0;
+  height: 0;
+}
+
+$directionMap: (
+  top: bottom,
+  left: right,
+  right: left,
+  bottom: top
+);
+
+@function oposite-direction($direction) {
+  @return map-get($directionMap, $direction);
+}
+
+@mixin triangle ($direction, $size, $bgcolor: $bgColor) {
+  $transparent-border: $size solid transparent;
+  @extend %zeroSize;
+  display: inline-block;
+  border-#{oposite-direction($direction)}: $size * 2 solid $bgcolor;
+  @if($direction == top or $direction == bottom or $direction == down) {
+    border-left: $transparent-border;
+    border-right: $transparent-border;
+  } @else if($direction == right or $direction == left) {
+    border-top: $transparent-border;
+    border-bottom: $transparent-border;
+  }
+}
+
+@mixin corner_triangle($verticalDir, $horizontalDir, $size, $bgcolor: $bgColor) {
+  @extend %zeroSize;
+  display: inline-block;
+  border-#{$verticalDir}: $size solid $bgcolor;
+  border-#{oposite-direction($horizontalDir)}: $size solid transparent;
+}
+@mixin right_angle_arrow($length, $thickness, $direction, $color) {
+  $degMap: (
+    top: 45deg,
+    right: 135deg,
+    down: 225deg,
+    left: -45deg
+  );
+  width: $length;
+  height: $length;
+  border-top: $thickness solid $color;
+  border-left: $thickness solid $color;
+  transform: rotate(#{map-get($degMap, $direction)})
+}
+
+.shape {
+  margin: 0 0 10px 0;
+}
+
+.square {
+  @include square(50px);
+}
+.rectangle {
+  @include rectangle(100px, 50px);
+}
+.circle {
+  @include circle(50px);
+}
+.oval {
+  @include oval(100px, 50px);
+}
+
+.triangle {
+  &.top {
+    @include triangle(top, 50px);
+  }
+  &.bottom {
+    @include triangle(bottom, 50px);
+  }
+  &.left {
+    @include triangle(left, 50px);
+  }
+  &.right {
+    @include triangle(right, 50px);
+  }
+}
+
+.corner-triangle {
+  &.top {
+    &.left {
+      @include corner_triangle(top, left, 100px);
+    }
+    &.right {
+      @include corner_triangle(top, right, 100px);
+    }
+  }
+  &.bottom {
+    &.left {
+      @include corner_triangle(bottom, left, 100px);
+    }
+    &.right {
+      @include corner_triangle(bottom, right, 100px);
+    }
+  }
+}
+
+.arrow-block {
+  div {
+    margin-right: 10px;
+    display: inline-block;
+  }
+  .right-angle-arrow {
+    &.top {
+      @include right_angle_arrow(20px, 2px, top, $bgColor);
+    }
+    &.right {
+      @include right_angle_arrow(20px, 2px, right, $bgColor);
+    }
+    &.down {
+      @include right_angle_arrow(20px, 2px, down, $bgColor);
+    }
+    &.left {
+      @include right_angle_arrow(20px, 2px, left, $bgColor);
+    }
+  }
+}
